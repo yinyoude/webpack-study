@@ -1,5 +1,6 @@
 "use strict";
 
+const glob = require('glob');
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 // const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
@@ -7,11 +8,64 @@ const CssMinimizerWebpackPlugin = require('css-minimizer-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 
+const setMAP = () => {
+    /*  目标：将 entry 设置成下面的
+        entry: {
+            index: './src/index.js',
+            search: './src/search.js'
+        },
+    */
+    const entry = {};
+    const htmlWebpackPlugins = [];
+
+    const entryFiles = glob.sync(path.join(__dirname, './src/*/index.js'));
+    /* [
+        'D:/personal/study/workSpace/webpack-study/src/index/index.js',
+        'D:/personal/study/workSpace/webpack-study/src/search/index.js'
+    ] */
+
+    Object.keys(entryFiles).map((index) => {
+        const entryFile = entryFiles[index]
+
+        const match = entryFile.match(/src\/(.*)\/index\.js/)
+        const pageName = match && match[1]  // 正则匹配，pageName 用来设置 entry 的 key
+        /* 
+        pageName [
+            'src/search/index.js',
+            'search',
+            index: 42,
+            input: 'D:/personal/study/workSpace/webpack-study/src/search/index.js',
+            groups: undefined
+        ]
+        */
+        entry[pageName] = entryFile
+
+        htmlWebpackPlugins.push(new HtmlWebpackPlugin({
+            template: path.join(__dirname, `src/${pageName}/index.html`),
+            filename: `${pageName}.html`,
+            chunks: [pageName],
+            inject: true,
+            minify: {
+                html: true,
+                collapseWhitespace: true,
+                preserveLineBreaks: false,
+                minifyCSS: true,
+                minifyJS: true,
+                removeComments: false 
+            }
+        }))
+    })
+
+    return {
+        entry,
+        htmlWebpackPlugins
+    }
+}
+
+const { entry, htmlWebpackPlugins } = setMAP();
+
 module.exports = {
-    entry: {
-        index: './src/index.js',
-        search: './src/search.js'
-    },
+    entry: entry,
     output: {
         path: path.join(__dirname, 'dist'),
         filename: '[name]_[chunkhash:8].js'
@@ -47,6 +101,13 @@ module.exports = {
                                 })
                             }
                         } */
+                    },
+                    {
+                        loader: 'px2rem-loader',
+                        options: {
+                            remUnit: 75, // 这样设置 750 的设计稿对应 10 rem
+                            remPrecesion: 8 // 小数点位数
+                        }
                     }
                 ]
             },
@@ -73,8 +134,8 @@ module.exports = {
             cssProcessor: require('cssnano')
         }) */
         new CssMinimizerWebpackPlugin(),
-        // 一般来说一个页面对应一个 HtmlWebpackPlugin
-        new HtmlWebpackPlugin({
+        // 一般来说一个页面对应一个 HtmlWebpackPlugin，后面改成了用 glob 动态引入的方式，具体的方法看上面的 setMAP
+        /* new HtmlWebpackPlugin({
             template: path.join(__dirname, 'src/search.html'), // 模板所在位置
             filename: 'search.html',    // 指定打包出来的文件名称
             chunks: ['search'],                 // 指定生成的 html 要使用哪些 chunk
@@ -101,7 +162,7 @@ module.exports = {
                 minifyJS: true,
                 removeComments: false 
             }
-        }),
+        }), */
         new CleanWebpackPlugin()
-    ]
+    ].concat(htmlWebpackPlugins)
 }

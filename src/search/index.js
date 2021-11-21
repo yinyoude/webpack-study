@@ -1,8 +1,17 @@
+/*
+ * @Description: 
+ * @Version: 1.0.22
+ * @Autor: youdeyin
+ * @Date: 2021-11-18 00:50:33
+ * @LastEditors: youdeyin
+ * @LastEditTime: 2021-11-22 01:46:21
+ * @FilePath: \webpack-study\src\search\index.js
+ */
 'use strict';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import logo from './images/vsCode-bg.png'
+import logo from '../images/vsCode-bg.png'
 import './search.less';
 
 class Search extends React.Component {
