@@ -6,6 +6,8 @@ const webpack = require('webpack'); // WDS 是 webpack 内置的
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
+// https://webpack.js.org/
+
 // loaders 解决 webpack 不能解析原生不支持的文件格式
 // webpack 原生支支持 js 和 json
 // 对于一些新的语法糖 scss, less, vue, jsx 要通过 loaders 支持
@@ -212,6 +214,41 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
     cheap: 不包含列信息
     inline: 将 .map 作为 DataURI 嵌入，不单独生成 .map 文件
     module: 包含 loader 的 sourcemap
+*/
+
+
+/* 
+tree shaking (摇树优化)
+概念：1个模块可能有多个方法，只要其中的某个方法使用到了，则整个文件都会被打包到 bundle 中去，tree shaking 就是只把用到的方法打入到 bundle，没用到的方法会在 uglify 阶段被删除掉。
+使用：webpack 默认支持，在 .babelrc 里设置 modules: false 即可
+production mode的情况下默认开启
+要求：必须是 es6 的语法，CJS 的方式不支持
+
+
+DCE(Elimination)
+1、代码不会被执行，不可到达
+if (false) {
+    console.log('这段代码永远不会执行');
+}
+2、代码执行的结果不会被用到
+function a () {
+    return 'a 函数只定义了，没有被调用，需要执行 a() 才会不满足 tree shaking 的条件'
+}
+3、代码只会影响死变量（只写不读）
+var noUseElement = 1
+function a () {
+    noUseElement = 2
+}
+定义了 noUseElement，但是 noUseElement 没有写的操作，没有读的操作，这种一般 eslint 会报错。需要执行 var nowUse = noUseElement 或者 if (noUseElement) 这种才会不满足 tree shaking 的条件
+
+tree-shaking 原理
+利用 ES6 模块的特点：
+（1）只能作为模块顶层的语句出现
+（2）import 的模块名只能是字符串常量
+（3）import binding 是 immutable 的
+代码擦除： uglify 阶段删除无用代码
+结合上面为什么 CJS 的方式不支持来理解：tree-shaking 本质其实是对模块的代码进行静态的分析，在编译阶段，哪些代码有用到，其实是需要确定下来的。而 CJS 是可以在代码运行的过程中动态的去 require，这样就满足不了 tree-shaking 的条件。
+tree-shaking 在知道了哪些代码没有用到之后，会给这些代码进行一些注释来标记，然后在 uglify 阶段把一些没有用的代码删除掉
 */
 
 

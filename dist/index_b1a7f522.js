@@ -1,0 +1,1 @@
+(()=>{"use strict";console.log((function(){return"common module"})),document.write("hello webpack")})();
