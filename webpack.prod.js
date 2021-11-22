@@ -44,7 +44,7 @@ const setMAP = () => {
         htmlWebpackPlugins.push(new HtmlWebpackPlugin({
             template: path.join(__dirname, `src/${pageName}/index.html`),
             filename: `${pageName}.html`,
-            chunks: [pageName],
+            chunks: ['vendors', 'commons', pageName],
             inject: true,
             minify: {
                 html: true,
@@ -71,7 +71,7 @@ module.exports = {
         path: path.join(__dirname, 'dist'),
         filename: '[name]_[chunkhash:8].js'
     },
-    mode: 'none',
+    mode: 'production',
     module: {
         rules: [
             {
@@ -165,7 +165,7 @@ module.exports = {
             }
         }), */
         new CleanWebpackPlugin(),
-        new HtmlWebpackExternalsPlugin({
+        /* new HtmlWebpackExternalsPlugin({
             externals: [
               {
                 module: 'react',
@@ -178,7 +178,32 @@ module.exports = {
                 global: 'ReactDOM',
               }
             ],
-          })
-    ].concat(htmlWebpackPlugins)
+        }) */
+    ].concat(htmlWebpackPlugins),
+    /* 分离基础包 */
+    /* optimization: {
+        splitChunks: {
+            cacheGroups: {
+                commons: {
+                    test: /(react|react-dom)/,
+                    name: 'vendors',
+                    chunks: 'all'
+                }
+            }
+        }
+    } */
+    /* 提取公共文件 */
+    optimization: {
+        splitChunks: {
+            minSize: 0, // 不限制大小，只要引入条件达到了，就打一个 commons 文件出来
+            cacheGroups: {
+                commons: {
+                    name: 'commons',
+                    chunks: 'all',
+                    minChunks: 2 // 最少引入次数是两次
+                }
+            }
+        }
+    }
     // devtool: 'source-map'
 }
