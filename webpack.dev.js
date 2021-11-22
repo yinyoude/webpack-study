@@ -1,8 +1,10 @@
 "use strict";
 
+const glob = require('glob');
 const path = require('path');
 const webpack = require('webpack'); // WDS 是 webpack 内置的
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 // loaders 解决 webpack 不能解析原生不支持的文件格式
 // webpack 原生支支持 js 和 json
@@ -203,11 +205,74 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 */
 
 
+/* 
+    source map 关键字
+    eval: 使用 eval 包裹模块代码
+    source map: 产生 .map 文件
+    cheap: 不包含列信息
+    inline: 将 .map 作为 DataURI 嵌入，不单独生成 .map 文件
+    module: 包含 loader 的 sourcemap
+*/
+
+
+const setMAP = () => {
+    /*  目标：将 entry 设置成下面的
+        entry: {
+            index: './src/index.js',
+            search: './src/search.js'
+        },
+    */
+    const entry = {};
+    const htmlWebpackPlugins = [];
+
+    const entryFiles = glob.sync(path.join(__dirname, './src/*/index.js'));
+    /* [
+        'D:/personal/study/workSpace/webpack-study/src/index/index.js',
+        'D:/personal/study/workSpace/webpack-study/src/search/index.js'
+    ] */
+
+    Object.keys(entryFiles).map((index) => {
+        const entryFile = entryFiles[index]
+
+        const match = entryFile.match(/src\/(.*)\/index\.js/)
+        const pageName = match && match[1]  // 正则匹配，pageName 用来设置 entry 的 key
+        /* 
+        pageName [
+            'src/search/index.js',
+            'search',
+            index: 42,
+            input: 'D:/personal/study/workSpace/webpack-study/src/search/index.js',
+            groups: undefined
+        ]
+        */
+        entry[pageName] = entryFile
+
+        htmlWebpackPlugins.push(new HtmlWebpackPlugin({
+            template: path.join(__dirname, `src/${pageName}/index.html`),
+            filename: `${pageName}.html`,
+            chunks: [pageName],
+            inject: true,
+            minify: {
+                html: true,
+                collapseWhitespace: true,
+                preserveLineBreaks: false,
+                minifyCSS: true,
+                minifyJS: true,
+                removeComments: false 
+            }
+        }))
+    })
+
+    return {
+        entry,
+        htmlWebpackPlugins
+    }
+}
+
+const { entry, htmlWebpackPlugins } = setMAP();
+
 module.exports = {
-    entry: {
-        index: './src/index.js',
-        search: './src/search.js'
-    },
+    entry: entry,
     output: {
         path: path.join(__dirname, 'dist'),
         filename: '[name].js'
@@ -245,9 +310,10 @@ module.exports = {
     plugins: [
         new webpack.HotModuleReplacementPlugin(),
         new CleanWebpackPlugin()
-    ],
+    ].concat(htmlWebpackPlugins),
     devServer: {
         contentBase: './dist',  // WDS 服务的基础目录
         hot: true
-    }
+    },
+    devtool: 'source-map'
 }
