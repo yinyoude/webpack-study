@@ -6,6 +6,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 // const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const CssMinimizerWebpackPlugin = require('css-minimizer-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const HtmlWebpackExternalsPlugin = require('html-webpack-externals-plugin')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 
 const setMAP = () => {
@@ -163,7 +164,21 @@ module.exports = {
                 removeComments: false 
             }
         }), */
-        new CleanWebpackPlugin()
-    ].concat(htmlWebpackPlugins),
-    devtool: 'source-map'
+        new CleanWebpackPlugin(),
+        new HtmlWebpackExternalsPlugin({
+            externals: [
+              {
+                module: 'react',
+                entry: 'https://now8.gtimg.com/now/lib/16.8.6/react.min.js',
+                global: 'React',
+              },
+              {
+                module: 'react-dom',
+                entry: 'https://now8.gtimg.com/now/lib/16.8.6/react-dom.min.js',
+                global: 'ReactDOM',
+              }
+            ],
+          })
+    ].concat(htmlWebpackPlugins)
+    // devtool: 'source-map'
 }
