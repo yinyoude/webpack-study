@@ -4,7 +4,7 @@
  * @Autor: youdeyin
  * @Date: 2021-11-18 00:50:33
  * @LastEditors: youdeyin
- * @LastEditTime: 2021-11-23 01:54:16
+ * @LastEditTime: 2021-11-24 00:09:36
  * @FilePath: \webpack-study\src\search\index.js
  */
 'use strict';
@@ -22,11 +22,30 @@ if (false) {
 }
 
 class Search extends React.Component {
+
+    constructor () {
+        super(...arguments);
+
+        this.state = {
+            Text: null
+        }
+    }
+
+    loadComponent() {
+        import('./text.js').then((Text) => {
+            this.setState({
+                Text: Text.default
+            })
+        })
+    }
+
     render () {
-        // 不会被 tree-shaking 干掉
-        const funcA = a()
+        const { Text } = this.state
         return <div className="search-text">
-            搜索文字{funcA}<img src={ logo } />
+            {
+                Text ? <Text /> : null
+            }
+            搜索文字<img src={ logo } onClick={ this.loadComponent.bind(this) }/>
         </div>;
     }
 }

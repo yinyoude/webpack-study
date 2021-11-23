@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkwebpack_study=self.webpackChunkwebpack_study||[]).push([[494],{494:(e,t,u)=>{u.r(t),u.d(t,{default:()=>s});var n=u(363),c=u.n(n);const s=function(){return c().createElement("div",null,"动态 import")}}}]);

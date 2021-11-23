@@ -1,6 +1,10 @@
 {
+    // 一个 preset 其实是多个 plugin 的集合
     "presets": [
         "@babel/preset-env",
         "@babel/preset-react"
+    ],
+    "plugins": [
+        "@babel/plugin-syntax-dynamic-import"
     ]
 }

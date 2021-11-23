@@ -165,7 +165,7 @@ module.exports = {
             }
         }), */
         new CleanWebpackPlugin(),
-        /* new HtmlWebpackExternalsPlugin({
+        new HtmlWebpackExternalsPlugin({
             externals: [
               {
                 module: 'react',
@@ -178,7 +178,7 @@ module.exports = {
                 global: 'ReactDOM',
               }
             ],
-        }) */
+        })
     ].concat(htmlWebpackPlugins),
     /* 分离基础包 */
     /* optimization: {
